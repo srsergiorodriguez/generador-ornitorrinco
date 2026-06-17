@@ -1,0 +1,255 @@
+/* src/app.css */
+
+/* 1. Variables Globales (Design Tokens) */
+:root {
+  /* Paleta de colores - Adaptable a la identidad institucional */
+  --color-fondo: #f4f4f9;
+  --color-blanco: #ffffff;
+  --color-borde: #e0e0e0;
+  --color-primario: #fcdc3b; /* Amarillo institucional */
+  --color-primario-hover: #e5c527;
+  --color-texto: #333333;
+  --color-texto-secundario: #666666;
+  --color-alerta: #d9534f;
+  --color-alerta-fondo: #f9e2e2;
+  --color-superficie-previa: #e9ecef;
+
+  /* Tipografía y Espaciado */
+  --fuente-ui: system-ui, -apple-system, sans-serif;
+  --fuente-documento: "Times New Roman", Times, serif;
+  --espaciado-sm: 0.5rem;
+  --espaciado-md: 1rem;
+  --espaciado-lg: 2rem;
+  --radio-borde: 6px;
+}
+
+/* 2. Estilos Base (Reset) */
+body {
+  margin: 0;
+  font-family: var(--fuente-ui);
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+}
+
+h1, h2, h3, p {
+  margin-top: 0;
+}
+
+/* 3. Clases de Diseño Estructural (Layout) */
+.layout-pantalla-completa {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.layout-encabezado {
+  background-color: var(--color-blanco);
+  padding: var(--espaciado-md) var(--espaciado-lg);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.layout-pantalla-dividida {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  flex: 1;
+  overflow: hidden;
+}
+
+.panel-interfaz {
+  background-color: var(--color-blanco);
+  border-right: 1px solid var(--color-borde);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.panel-fondo-previa {
+  background-color: var(--color-superficie-previa);
+  padding: var(--espaciado-lg);
+  display: flex;
+  flex-direction: column;
+  /* Se eliminó align-items: center para evitar el bug del scroll */
+  overflow-y: auto;
+}
+
+/* 4. Componentes UI (Formularios y Botones) */
+.ui-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.ui-tab-btn {
+  flex: 1;
+  padding: var(--espaciado-md) var(--espaciado-sm);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-weight: bold;
+  color: var(--color-texto-secundario);
+  transition: all 0.2s ease;
+}
+
+.ui-tab-btn.activo {
+  border-bottom-color: var(--color-primario);
+  color: var(--color-texto);
+}
+
+.ui-form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--espaciado-md);
+}
+
+.ui-form-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: var(--espaciado-sm);
+}
+
+.ui-form-input {
+  padding: 0.8rem;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-borde);
+  font-size: 1rem;
+  font-family: var(--fuente-ui);
+}
+
+.ui-btn {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: var(--radio-borde);
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.ui-btn-primario {
+  background-color: var(--color-primario);
+  color: #000;
+}
+
+.ui-btn-primario:hover {
+  background-color: var(--color-primario-hover);
+}
+
+.ui-btn-secundario {
+  background-color: #e0e0e0;
+  color: var(--color-texto);
+}
+
+.ui-btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 5. Clases para Documentos Legales Generados */
+/* Ajuste a la hoja de papel simulada */
+.doc-papel {
+  background-color: var(--color-blanco);
+  width: 100%;
+  max-width: 800px;
+  min-height: 1056px;
+  height: auto; 
+  /* ESTA ES LA LÍNEA MÁGICA QUE EVITA EL CORTE VERTICAL */
+  flex-shrink: 0; 
+  
+  padding: 4rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-sizing: border-box;
+  font-family: var(--fuente-documento);
+  line-height: 1.6;
+  font-size: 12pt;
+  margin: 0 auto 2rem auto;
+}
+
+/* Evitar que bloques importantes se corten entre páginas */
+.bloque-indivisible {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.doc-centrado {
+  text-align: center;
+}
+
+.doc-marcador-vacio {
+  color: var(--color-alerta);
+  background-color: var(--color-alerta-fondo);
+  padding: 0 4px;
+  font-weight: bold;
+}
+
+@media print {
+  /* Forzar márgenes en el documento PDF (2.5cm es el estándar de Word) */
+  @page {
+    margin: 2.5cm;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+  
+  #documento-exportable, #documento-exportable * {
+    visibility: visible;
+  }
+  
+  #documento-exportable {
+    position: absolute;
+    left: 0;
+    top: 0;
+    /* Quitamos el padding aquí porque el @page ya da las márgenes */
+    padding: 0; 
+    margin: 0;
+    box-shadow: none;
+    width: 100%;
+    height: auto;
+  }
+
+  p, h1, h2, h3, li {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
+
+/* 6. Estilos del Modal */
+.ui-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.ui-modal-content {
+  background-color: var(--color-blanco);
+  padding: var(--espaciado-lg);
+  border-radius: var(--radio-borde);
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.ui-modal-titulo {
+  margin-top: 0;
+  font-size: 1.2rem;
+  color: var(--color-texto);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ui-modal-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
