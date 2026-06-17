@@ -18,7 +18,7 @@ export const formData = $state({
 
   // Módulo: Política de Tratamiento de Datos
   responsableTratamiento: "Universidad de los Andes - Facultad de Artes y Humanidades",
-  contactoResponsableDatos: "", // NUEVO: Independiente del investigador principal
+  contactoResponsableDatos: "",
   emailContactoDatos: "habeasdata@uniandes.edu.co",
   finalidadEspecifica: "",
   datosCapturados: "", // Ej: nombres, audios, correos

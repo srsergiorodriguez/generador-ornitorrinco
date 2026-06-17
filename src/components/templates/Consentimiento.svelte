@@ -26,7 +26,7 @@
   </p>
 
   <p><strong>3. Riesgos y molestias esperadas:</strong><br>
-    De acuerdo con la Resolución 008430 de 1993 del Ministerio de Salud, esta investigación se clasifica como de <strong>{formData.nivelRiesgo}</strong>. {#if formData.descripcionRiesgos}{formData.descripcionRiesgos}{:else}<span class="doc-marcador-vacio">[Describa los riesgos]</span>{/if} En caso de experimentar algún malestar derivado de las actividades, {#if formData.medidasContencion}{formData.medidasContencion}{:else}<span class="doc-marcador-vacio">[Describa las medidas de contención]</span>{/if}.
+    De acuerdo con la Resolución 008430 de 1993 del Ministerio de Salud, esta investigación se clasifica como {#if formData.nivelRiesgo !== "Sin Riesgo"} de {/if} <strong>{formData.nivelRiesgo}</strong>. {#if formData.descripcionRiesgos}{formData.descripcionRiesgos}{:else}<span class="doc-marcador-vacio">[Describa los riesgos]</span>{/if} En caso de experimentar algún malestar derivado de las actividades, {#if formData.medidasContencion}{formData.medidasContencion}{:else}<span class="doc-marcador-vacio">[Describa las medidas de contención]</span>{/if}.
   </p>
 
   <p><strong>4. Beneficios esperados:</strong><br>
