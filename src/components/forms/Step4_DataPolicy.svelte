@@ -5,17 +5,17 @@
 </script>
 
 <div class="ui-form-group">
-  <label class="ui-form-label">1. Título del Proyecto:</label>
+  <label class="ui-form-label">Título del Proyecto:</label>
   <input class="ui-form-input" bind:value={formData.tituloProyecto} placeholder="Ej. Historias del Arte Transculturales..." />
 </div>
 
 <div class="ui-form-group" style="margin-top: 1.5rem;">
-  <label class="ui-form-label">2. Responsable del Tratamiento:</label>
+  <label class="ui-form-label">Responsable del Tratamiento:</label>
   <input class="ui-form-input" bind:value={formData.responsableTratamiento} placeholder="Ej. Universidad de los Andes - Facultad de Artes y Humanidades" />
 </div>
 
 <div class="ui-form-group" style="margin-top: 1.5rem;">
-  <label class="ui-form-label">3. Finalidad específica del tratamiento:</label>
+  <label class="ui-form-label">Finalidad específica del tratamiento:</label>
   <p style="font-size: 0.85rem; color: var(--color-texto-secundario); margin-bottom: 0.5rem;">
     Explique para qué usará la información personal. El texto continuará esta frase: <em>"Los datos serán tratados con la finalidad de..."</em>
   </p>
@@ -32,7 +32,7 @@ Tu respuesta: establecer contacto futuro con los participantes y gestionar la pu
 </div>
 
 <div class="ui-form-group" style="margin-top: 1.5rem;">
-  <label class="ui-form-label">4. Datos personales a recolectar:</label>
+  <label class="ui-form-label">Datos personales a recolectar:</label>
   <p style="font-size: 0.85rem; color: var(--color-texto-secundario); margin-bottom: 0.5rem;">
     Liste los datos. El texto continuará esta frase: <em>"La investigación recolectará datos consistentes en..."</em>
   </p>
@@ -49,11 +49,11 @@ Tu respuesta: nombres completos, correos electrónicos y registros fotográficos
 </div>
 
 <div class="ui-form-group" style="margin-top: 1.5rem;">
-  <label class="ui-form-label">5. Nombre del contacto para Habeas Data:</label>
+  <label class="ui-form-label">Nombre del contacto para Habeas Data:</label>
   <input class="ui-form-input" type="text" bind:value={formData.contactoResponsableDatos} placeholder="Ej. Nombre del Investigador o Coordinación" />
 </div>
 
 <div class="ui-form-group" style="margin-top: 1.5rem;">
-  <label class="ui-form-label">6. Correo electrónico de contacto:</label>
+  <label class="ui-form-label">Correo electrónico de contacto:</label>
   <input class="ui-form-input" type="email" bind:value={formData.emailContactoDatos} placeholder="Ej. habeasdata@uniandes.edu.co" />
 </div>

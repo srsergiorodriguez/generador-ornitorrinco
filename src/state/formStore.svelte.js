@@ -1,7 +1,28 @@
-// src/lib/state/formStore.svelte.js
+// @ts-nocheck
 import { CreateMLCEngine } from '@mlc-ai/web-llm';
+import { untrack } from 'svelte';
 
 export const formData = $state({
+  // Módulo: Asistente Platypus
+  platypusDescEnfoque: "",
+  platypusDescMetodos: "",
+  platypusDescFases: "",
+  
+  platypusObjQue: "",
+  platypusObjComo: "",
+  platypusObjParaQue: "",
+
+  platypusDatosAlmacenamiento: "",
+  platypusDatosRetencion: "",
+  platypusDatosAcceso: "",
+
+  platypusContencionResponsables: "",
+  platypusContencionAcciones: "",
+  platypusContencionRutas: "",
+
+  platypusMuestras: "El proyecto, debido a que se desarrolla en el marco de las prácticas de las artes y las humanidades, no corresponde a una investigación en ciencias naturales y no contempla la toma de muestras biológicas de ningún tipo.",
+
+  // Módulo: Consentimiento y asentimiento informado
   tituloProyecto: "",
   investigadorPrincipal: "",
   justificacionObjetivos: "",
@@ -24,7 +45,10 @@ export const formData = $state({
   datosCapturados: "", // Ej: nombres, audios, correos
   tiempoConservacion: "Durante la vigencia del proyecto y su posterior archivo histórico",
   finalidadUsoIa: false,
-  datosUsoIa: false
+  datosUsoIa: false,
+
+  isValidating: false,
+  validationResult: "",
 });
 
 export const aiState = $state({
@@ -86,4 +110,195 @@ REGLAS INQUEBRANTABLES:
   }
 
   return resultado;
+}
+
+export async function validarComoConsejero(herramientaActiva) {
+  if (!aiState.isReady || !aiState.engine) return;
+
+  aiState.isValidating = true;
+  aiState.validationResult = "";
+
+  const campoVacio = "[SECCIÓN SIN DILIGENCIAR]";
+  let estaVacio = false;
+  let datos = "";
+  let rolContexto = "";
+  let reglasContexto = "";
+
+  // 1. CONFIGURACIÓN DINÁMICA SEGÚN LA HERRAMIENTA ACTIVA
+  if (herramientaActiva === 'platypus') {
+    estaVacio = !formData.platypusDescEnfoque && !formData.platypusDescMetodos && !formData.platypusDescFases && !formData.platypusObjQue && !formData.platypusProtocoloDatos;
+    
+    datos = `
+    --- DESCRIPCIÓN ---
+    Enfoque: ${formData.platypusDescEnfoque || campoVacio}
+    Métodos: ${formData.platypusDescMetodos || campoVacio}
+    Fases: ${formData.platypusDescFases || campoVacio}
+    
+    --- OBJETIVO ---
+    ${(formData.platypusObjQue || formData.platypusObjComo || formData.platypusObjParaQue) ? (formData.platypusObjQue + ' ' + formData.platypusObjComo + ' ' + formData.platypusObjParaQue) : campoVacio}
+    
+    --- DATOS Y PRIVACIDAD ---
+    Almacenamiento: ${formData.platypusDatosAlmacenamiento || campoVacio}
+    Retención: ${formData.platypusDatosRetencion || campoVacio}
+    Acceso: ${formData.platypusDatosAcceso || campoVacio}
+    
+    --- CONTENCIÓN EMOCIONAL ---
+    ${(formData.platypusContencionResponsables || formData.platypusContencionAcciones) ? (formData.platypusContencionResponsables + ' ' + formData.platypusContencionAcciones) : 'No aplica'}
+    `;
+    
+    rolContexto = "evaluar la solidez metodológica y procedimental de la propuesta para la plataforma institucional.";
+    reglasContexto = "Busca huecos metodológicos. Por ejemplo, si mencionan 'entrevistas', advierte si falta especificar si serán grabadas; si mencionan 'almacenamiento', advierte si falta la plataforma específica.";
+  
+  } else if (herramientaActiva === 'consentimiento') {
+    estaVacio = !formData.justificacionObjetivos && !formData.metodologiasLibres && !formData.descripcionRiesgos;
+    
+    datos = `
+    --- JUSTIFICACIÓN Y OBJETIVOS ---
+    ${formData.justificacionObjetivos || campoVacio}
+    
+    --- METODOLOGÍA (Explicada al participante) ---
+    ${formData.metodologiasLibres || campoVacio}
+    
+    --- RIESGOS REPORTADOS ---
+    ${formData.descripcionRiesgos || campoVacio}
+    
+    --- MEDIDAS DE CONTENCIÓN ---
+    ${formData.medidasContencion || campoVacio}
+    `;
+    
+    rolContexto = "evaluar la claridad, transparencia y protección al participante en el proceso de consentimiento informado.";
+    reglasContexto = "Verifica que el lenguaje sea comprensible para un participante no académico. Asegúrate de que los riesgos estén claramente expuestos y que tengan medidas de contención lógicas y directas. Alerta si se usa jerga excesiva.";
+  
+  } else if (herramientaActiva === 'politica') {
+    estaVacio = !formData.datosCapturados && !formData.manejoDatos && !formData.tiempoConservacion && !formData.finalidadEspecifica;
+    
+    datos = `
+    --- FINALIDAD DEL TRATAMIENTO ---
+    ${formData.finalidadEspecifica || campoVacio}
+    
+    --- TIPOS DE DATOS CAPTURADOS ---
+    ${formData.datosCapturados || campoVacio}
+    
+    --- MANEJO Y SEGURIDAD ---
+    ${formData.manejoDatos || campoVacio}
+    
+    --- TIEMPO DE CONSERVACIÓN ---
+    ${formData.tiempoConservacion || campoVacio}
+    `;
+    
+    rolContexto = "evaluar el cumplimiento de las normativas de protección de datos (Habeas Data) y seguridad de la información.";
+    reglasContexto = "Verifica que se especifique claramente qué datos se recogen, cómo se encriptan o protegen, quién tiene acceso y en qué momento exacto se destruyen. Alerta sobre prácticas inseguras como uso de USBs personales o falta de anonimización.";
+  }
+
+  // 2. GUARDARRAÍL DE PROCESAMIENTO
+  if (estaVacio) {
+    aiState.validationResult = "💡 El formulario se encuentra completamente vacío. Por favor, diligencie al menos una sección de su documento para que el Consejero IA pueda analizarla y ofrecerle sugerencias concretas.";
+    aiState.isValidating = false;
+    return;
+  }
+
+  // 3. PROMPT MAESTRO DINÁMICO
+  const promptConsejero = `Eres un Consejero Técnico del Comité de Ética de la Facultad de Artes y Humanidades.
+Tu objetivo es leer los apuntes del investigador y ${rolContexto}
+
+APUNTES DEL INVESTIGADOR:
+${datos}
+
+REGLAS DE COMPORTAMIENTO:
+1. TONO: Profesional, directo y técnico. PROHIBIDO usar adulaciones (nada de "buen trabajo", "excelente estructura", etc.).
+2. VACÍOS: Si ves el texto "${campoVacio}", indica directamente qué información hace falta ahí con un breve ejemplo pertinente.
+3. CONCRECIÓN: ${reglasContexto}
+4. EXCEPCIÓN: Omite cualquier mención a muestras biológicas o riesgos clínicos. Asume siempre un contexto de artes y humanidades.
+
+Responde ÚNICAMENTE con esta estructura (usa viñetas para cada punto):
+📌 Observaciones Técnicas:
+[Analiza aquí los textos diligenciados y señala huecos lógicos, riesgos éticos o ambigüedades]
+
+💡 Sugerencias de Completitud:
+[Indica aquí qué secciones vitales faltan por llenar y qué se espera exactamente en ellas]`;
+
+  try {
+    const messages = [
+      { role: "system", content: "Eres un asesor técnico riguroso, útil y directo. No adulas." },
+      { role: "user", content: promptConsejero }
+    ];
+
+    const chunks = await aiState.engine.chat.completions.create({
+      messages,
+      temperature: 0.1, // Temperatura baja para mantener el análisis lógico y evitar alucinaciones
+      stream: true,
+    });
+
+    for await (const chunk of chunks) {
+      aiState.validationResult += chunk.choices[0]?.delta?.content || "";
+    }
+  } catch (error) {
+    console.error("Error en consejería:", error);
+    aiState.validationResult = "Ocurrió un error técnico al intentar generar los consejos. Revise la consola.";
+  } finally {
+    aiState.isValidating = false;
+  }
+}
+
+// --- FUNCIONES DE PERSISTENCIA ---
+
+export function persistir() {
+  localStorage.setItem('eticaSuite_backup', JSON.stringify(formData));
+}
+
+// 1. Guardar en el navegador
+export function guardarEnNavegador() {
+  try {
+    localStorage.setItem('eticaSuite_backup', JSON.stringify(formData));
+  } catch (error) {
+    console.error("Error guardando en localStorage:", error);
+  }
+}
+
+// 2. Cargar del navegador
+export function cargarDelNavegador() {
+  try {
+    const backup = localStorage.getItem('eticaSuite_backup');
+    if (backup) {
+      const parsed = JSON.parse(backup);
+      Object.assign(formData, parsed);
+      return true;
+    }
+  } catch (error) {
+    console.error("Error cargando de localStorage:", error);
+  }
+  return false;
+}
+
+// 3. Exportar como archivo .json
+export function exportarProyectoJSON() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(formData, null, 2));
+  const enlace = document.createElement('a');
+  enlace.setAttribute("href", dataStr);
+  
+  const nombreBase = formData.tituloProyecto ? formData.tituloProyecto.replace(/\s+/g, '_') : 'Proyecto_Etica';
+  enlace.setAttribute("download", `${nombreBase}.json`);
+  
+  document.body.appendChild(enlace);
+  enlace.click();
+  document.body.removeChild(enlace);
+}
+
+// 4. Importar desde archivo .json
+export function importarProyectoJSON(evento) {
+  const archivo = evento.target.files[0];
+  if (!archivo) return;
+
+  const lector = new FileReader();
+  lector.onload = (e) => {
+    try {
+      const contenido = JSON.parse(e.target.result);
+      Object.assign(formData, contenido);
+      guardarEnNavegador(); // Actualizamos también el caché local
+      alert("Proyecto cargado exitosamente.");
+    } catch (error) {
+      alert("Error al leer el archivo. Asegúrese de que sea un .json válido de la Suite.");
+    }
+  };
+  lector.readAsText(archivo);
 }

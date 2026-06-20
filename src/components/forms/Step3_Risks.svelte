@@ -5,7 +5,7 @@
 </script>
 
 <div class="ui-form-group">
-  <label class="ui-form-label" for="nivelRiesgo">1. Clasificación del Riesgo (Res. 008430):</label>
+  <label class="ui-form-label" for="nivelRiesgo">Clasificación del Riesgo (Res. 008430):</label>
   <select class="ui-form-input" id="nivelRiesgo" bind:value={formData.nivelRiesgo}>
     <option value="Sin Riesgo">Sin Riesgo (Investigación documental o retrospectiva)</option>
     <option value="Riesgo Mínimo">Riesgo Mínimo (Entrevistas, talleres, trabajo de campo común)</option>
@@ -14,7 +14,7 @@
 </div>
 
 <div class="ui-form-group">
-  <label class="ui-form-label" for="riesgos">2. Descripción de molestias o riesgos esperados:</label>
+  <label class="ui-form-label" for="riesgos">Descripción de molestias o riesgos esperados:</label>
   <p style="font-size: 0.85rem; color: var(--color-texto-secundario); margin-bottom: 0.5rem;">
     Va después de definir el nivel de riesgo. Ej. Fatiga o sensibilidad emocional.
   </p>
@@ -30,7 +30,7 @@
 </div>
 
 <div class="ui-form-group" style="margin-top: 1.5rem;">
-  <label class="ui-form-label" for="contencion">3. Medidas de contención / Acompañamiento:</label>
+  <label class="ui-form-label" for="contencion">Medidas de contención / Acompañamiento:</label>
   <p style="font-size: 0.85rem; color: var(--color-texto-secundario); margin-bottom: 0.5rem;">
     El texto continuará esta frase: <em>"En caso de experimentar algún malestar derivado de las actividades, [su texto]"</em>
   </p>
@@ -49,7 +49,7 @@ Tu respuesta: se pausará el encuentro de inmediato, se ofrecerá un espacio de 
 </div>
 
 <div class="ui-form-group" style="margin-top: 1.5rem;">
-  <label class="ui-form-label" for="beneficios">4. Beneficios esperados:</label>
+  <label class="ui-form-label" for="beneficios">Beneficios esperados:</label>
   <p style="font-size: 0.85rem; color: var(--color-texto-secundario); margin-bottom: 0.5rem;">
     El texto continuará esta frase: <em>"Sin embargo, usted contribuirá a [su texto]"</em>
   </p>
@@ -68,7 +68,7 @@ Tu respuesta: la generación de innovaciones metodológicas en el campo de las h
 </div>
 
 <div class="ui-form-group" style="margin-top: 1.5rem;">
-  <label class="ui-form-label" for="datos">5. Confidencialidad y Manejo de Datos:</label>
+  <label class="ui-form-label" for="datos">Confidencialidad y Manejo de Datos:</label>
   <p style="font-size: 0.85rem; color: var(--color-texto-secundario); margin-bottom: 0.5rem;">
     ¿Cómo garantizará la privacidad y dónde se almacenará la información?
   </p>

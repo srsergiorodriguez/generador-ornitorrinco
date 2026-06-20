@@ -4,7 +4,7 @@
 </script>
 
 <div class="ui-form-group">
-  <label class="ui-form-label" for="metodologias">1. ¿Qué actividades específicas realizarán los participantes?</label>
+  <label class="ui-form-label" for="metodologias">¿Qué actividades específicas realizarán los participantes?</label>
   <p style="font-size: 0.85rem; color: var(--color-texto-secundario); margin-bottom: 0.5rem;">
     El texto continuará esta frase: <em>"Su participación consistirá en hacer parte de..."</em>
   </p>
@@ -23,7 +23,7 @@ Tu respuesta: talleres de investigación-creación enfocados en la colaboración
 </div>
 
 <div class="ui-form-group" style="margin-top: 1.5rem;">
-  <label class="ui-form-label" for="resultados">2. ¿Cuáles serán los productos o resultados de divulgación?</label>
+  <label class="ui-form-label" for="resultados">¿Cuáles serán los productos o resultados de divulgación?</label>
   <p style="font-size: 0.85rem; color: var(--color-texto-secundario); margin-bottom: 0.5rem;">
     El texto continuará esta frase: <em>"servirán como base para la producción de..."</em>
   </p>
@@ -42,7 +42,7 @@ Tu respuesta: un repositorio web de acceso abierto y una serie de podcasts cultu
 </div>
 
 <div class="ui-form-group" style="margin-top: 1.5rem;">
-  <label class="ui-form-label" for="procedimientos">3. Descripción adicional del procedimiento (Opcional):</label>
+  <label class="ui-form-label" for="procedimientos">Descripción adicional del procedimiento (Opcional):</label>
   <p style="font-size: 0.85rem; color: var(--color-texto-secundario); margin-bottom: 0.5rem;">
     Especifique detalles logísticos si lo requiere.
   </p>
