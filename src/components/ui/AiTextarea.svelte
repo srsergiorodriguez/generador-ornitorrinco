@@ -7,7 +7,7 @@
     rows = 4,
     placeholder = "",
     instruccionesIA = "",
-    esFragmento = false // NUEVA BANDERA
+    esFragmento = false
   } = $props();
 
   let isGenerating = $state(false);

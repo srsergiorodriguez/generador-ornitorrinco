@@ -46,10 +46,8 @@
 
   <p><strong>Contención emocional</strong><br>
     <span style="white-space: pre-wrap;">
-      {#if formData.platypusContencionResponsables || formData.platypusContencionAcciones || formData.platypusContencionRutas}
-        {#if formData.platypusContencionResponsables}{formData.platypusContencionResponsables}{"\n\n"}{/if}
-        {#if formData.platypusContencionAcciones}{formData.platypusContencionAcciones}{"\n\n"}{/if}
-        {#if formData.platypusContencionRutas}{formData.platypusContencionRutas}{/if}
+      {#if formData.platypusContencion}
+        {formData.platypusContencion}
       {:else}
         No aplica para este proyecto.
       {/if}

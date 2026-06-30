@@ -1,7 +1,8 @@
 <script>
   import { 
     formData, aiState, initGlobalEngine, validarComoConsejero, 
-    cargarDelNavegador, exportarProyectoJSON, importarProyectoJSON 
+    cargarDelNavegador, exportarProyectoJSON, importarProyectoJSON,
+    autocompletarDesdePlatypus, llenarDatosPruebaPlatypus
   } from './state/formStore.svelte.js';
   import { onMount } from 'svelte';
   
@@ -26,24 +27,21 @@
   let mostrarGuia = $state(false);
   let mostrarGlosario = $state(false);
   let mostrarModalValidacion = $state(false);
-
   let vistaDocumentoActual = $state('consentimiento');
-  let datosCargados = $state(false); // Bandera para evitar que el autoguardado borre los datos al inicio
+  let datosCargados = $state(false); 
 
-  // 1. Cargar datos al iniciar
   onMount(() => {
     cargarDelNavegador();
-    datosCargados = true; // Habilita el autoguardado solo después de cargar
+    formData.iaActivada = false;
+    datosCargados = true; 
   });
 
-  // 2. Autoguardado reactivo y seguro
   $effect(() => {
     if (datosCargados) {
       localStorage.setItem('eticaSuite_backup', JSON.stringify(formData));
     }
   });
 
-  // Funciones de Exportación
   function copiarTexto() {
     const docText = document.getElementById('documento-exportable').innerText;
     navigator.clipboard.writeText(docText).then(() => alert("¡Texto copiado!"));
@@ -84,16 +82,24 @@
     mostrarModalValidacion = true;
     validarComoConsejero(herramientaActiva);
   }
+
+  function nuevoProyecto() {
+    const confirmar = confirm("¿Está seguro de que desea iniciar un nuevo proyecto? Se perderán todos los datos que no haya guardado en un archivo .json.");
+    if (confirmar) {
+      localStorage.removeItem('eticaSuite_backup');
+      window.location.reload();
+    }
+  }
 </script>
 
 <main class="layout-pantalla-completa">
-  <header class="layout-encabezado" style="display: flex; justify-content: space-between; align-items: center; border-bottom: none;">
+  <header class="layout-encabezado">
     <div>
-      <h1 style="font-size: 1.4rem; margin-bottom: 0.2rem;">Suite de Ética de Investigación</h1>
-      <p style="color: var(--color-texto-secundario); font-size: 0.9rem; margin-bottom: 0;">Facultad de Artes y Humanidades</p>
+      <h1 class="header-titulo">Suite de Ética de Investigación</h1>
+      <p class="header-subtitulo">Facultad de Artes y Humanidades</p>
     </div>
     
-    <div style="display: flex; gap: 0.5rem; align-items: center;">
+    <div class="ui-grupo-acciones">
 
       <button class="ui-btn ui-btn-secundario" onclick={() => mostrarGuia = true}>
         Instrucciones
@@ -102,33 +108,36 @@
       <button class="ui-btn ui-btn-secundario" onclick={() => mostrarGlosario = true}>
         Glosario
       </button>
-
+      
       {#if !formData.iaActivada}
         <button class="ui-btn ui-btn-secundario" onclick={() => mostrarModalIA = true}>
           Activar Asistente IA
         </button>
       {:else if aiState.isInitializing}
-        <div style="display: flex; flex-direction: column; align-items: flex-end; width: 200px; margin-left: 0.5rem;">
-          <span style="font-size: 0.8rem; font-weight: 600; color: var(--color-texto-secundario); margin-bottom: 2px;">
-            Preparando IA ({aiState.progressPercent}%)
-          </span>
-          <div style="width: 100%; background-color: var(--color-borde); border-radius: 4px; overflow: hidden;">
-            <div style="height: 5px; background-color: var(--color-primario); width: {aiState.progressPercent}%; transition: width 0.2s;"></div>
+        <div class="ai-progreso-contenedor">
+          <span class="ai-progreso-texto">Preparando IA ({aiState.progressPercent}%)</span>
+          <div class="ai-progreso-fondo">
+            <div class="ai-progreso-barra" style="width: {aiState.progressPercent}%;"></div>
           </div>
         </div>
       {:else if aiState.isReady}
-        <span style="font-size: 0.9rem; color: #4CAF50; font-weight: bold; margin-left: 0.5rem;">
-          Asistente IA Listo
-        </span>
+        <span class="ai-listo-texto">Asistente IA Listo</span>
       {/if}
 
+      <button class="ui-btn ui-btn-dev" onclick={llenarDatosPruebaPlatypus} title="Rellenar Platypus con datos de prueba">
+        Dev: Cargar Prueba
+      </button>
+
+      <button class="ui-btn ui-btn-secundario" onclick={nuevoProyecto} title="Limpiar todo e iniciar un proyecto en blanco">
+        Nuevo Proyecto
+      </button>
 
       <button class="ui-btn ui-btn-secundario" onclick={exportarProyectoJSON} title="Descargar archivo JSON del proyecto">
-        Guardar Proyecto
+        Guardar
       </button>
       
       <label class="ui-btn ui-btn-secundario" style="margin: 0; cursor: pointer;" title="Cargar archivo JSON de un proyecto anterior">
-        Cargar Proyecto
+        Abrir
         <input type="file" accept=".json" style="display: none;" onchange={importarProyectoJSON} />
       </label>
     </div>
@@ -138,27 +147,15 @@
     <InstructionsPanel cerrarGuia={() => mostrarGuia = false} />
   {/if}
 
-  <nav style="background-color: var(--color-blanco); border-bottom: 1px solid var(--color-borde); padding: 0 2rem; display: flex; gap: 1rem;">
-    <button 
-      class="ui-tab-btn {herramientaActiva === 'platypus' ? 'activo' : ''}" 
-      style="padding: 1rem 0.5rem; border-bottom-width: 3px;"
-      onclick={() => herramientaActiva = 'platypus'}
-    >
+  <nav class="layout-nav">
+    <button class="ui-tab-btn {herramientaActiva === 'platypus' ? 'activo' : ''}" onclick={() => herramientaActiva = 'platypus'}>
       Asistente Platypus
     </button>
-    <button 
-      class="ui-tab-btn {herramientaActiva === 'consentimiento' ? 'activo' : ''}" 
-      style="padding: 1rem 0.5rem; border-bottom-width: 3px;"
-      onclick={() => herramientaActiva = 'consentimiento'}
-    >
-      Consentimiento y Asentimiento Informado
+    <button class="ui-tab-btn {herramientaActiva === 'consentimiento' ? 'activo' : ''}" onclick={() => herramientaActiva = 'consentimiento'}>
+      Consentimiento y Asentimiento
     </button>
-    <button 
-      class="ui-tab-btn {herramientaActiva === 'politica' ? 'activo' : ''}" 
-      style="padding: 1rem 0.5rem; border-bottom-width: 3px;"
-      onclick={() => herramientaActiva = 'politica'}
-    >
-      Política de Tratamiento de Datos
+    <button class="ui-tab-btn {herramientaActiva === 'politica' ? 'activo' : ''}" onclick={() => herramientaActiva = 'politica'}>
+      Política de Datos
     </button>
   </nav>
 
@@ -169,52 +166,73 @@
         <div class="ui-tabs">
           <button class="ui-tab-btn activo">Formulario Institucional</button>
         </div>
-        <div style="padding: 2rem; flex: 1;">
+        <div class="panel-contenido">
           <Step5Platypus />
         </div>
+
       {:else if herramientaActiva === 'consentimiento'}
         <div class="ui-tabs">
           <button onclick={() => pasoActual = 1} class="ui-tab-btn {pasoActual === 1 ? 'activo' : ''}">1. General</button>
           <button onclick={() => pasoActual = 2} class="ui-tab-btn {pasoActual === 2 ? 'activo' : ''}">2. Metodología</button>
           <button onclick={() => pasoActual = 3} class="ui-tab-btn {pasoActual === 3 ? 'activo' : ''}">3. Riesgos</button>
         </div>
-        <div style="padding: 2rem; flex: 1;">
+
+        {#if formData.iaActivada && aiState.isReady && formData.habilitarSincronizacion}
+          <div class="ui-banner">
+            <div class="ui-banner-contenido">
+              <strong class="ui-banner-titulo">Sincronización Inteligente</strong>
+              <span class="ui-banner-texto">Utilice los datos del borrador de Platypus para redactar automáticamente este documento.</span>
+            </div>
+            <button class="ui-btn ui-btn-primario ui-btn-sm" onclick={() => autocompletarDesdePlatypus('consentimiento')} disabled={aiState.isGenerating}>
+              {aiState.isGenerating ? 'Generando...' : 'Autocompletar'}
+            </button>
+          </div>
+        {/if}
+
+        <div class="panel-contenido">
           {#if pasoActual === 1} <Step1General />
           {:else if pasoActual === 2} <Step2Methodology />
           {:else if pasoActual === 3} <Step3Risks />
           {/if}
         </div>
-        <div style="display: flex; justify-content: space-between; padding: 1rem 2rem; border-top: 1px solid var(--color-borde); background: #fafafa;">
+        <div class="panel-footer-navegacion">
           <button class="ui-btn ui-btn-secundario" disabled={pasoActual === 1} onclick={() => pasoActual--}>Atrás</button>
           <button class="ui-btn ui-btn-primario" disabled={pasoActual === 3} onclick={() => pasoActual++}>Siguiente</button>
         </div>
+
       {:else if herramientaActiva === 'politica'}
         <div class="ui-tabs">
           <button class="ui-tab-btn activo">Definición de Tratamiento</button>
         </div>
-        <div style="padding: 2rem; flex: 1;">
+
+        {#if formData.iaActivada && aiState.isReady && formData.habilitarSincronizacion}
+          <div class="ui-banner">
+            <div class="ui-banner-contenido">
+              <strong class="ui-banner-titulo">Sincronización Inteligente</strong>
+              <span class="ui-banner-texto">Utilice los datos de Platypus para redactar los artículos de esta política.</span>
+            </div>
+            <button class="ui-btn ui-btn-primario ui-btn-sm" onclick={() => autocompletarDesdePlatypus('politica')} disabled={aiState.isGenerating}>
+              {aiState.isGenerating ? 'Generando...' : 'Autocompletar'}
+            </button>
+          </div>
+        {/if}
+
+        <div class="panel-contenido">
           <Step4DataPolicy />
         </div>
       {/if}
-
     </section>
 
     <section class="panel-fondo-previa">
-      <div style="width: 100%; max-width: 800px; display: flex; justify-content: space-between; margin: 0 auto 1rem auto; align-items: center;">
+      <div class="preview-header">
         
         {#if herramientaActiva === 'consentimiento'}
-          <div style="display: flex; gap: 0.5rem; background: var(--color-borde); padding: 0.25rem; border-radius: 6px;">
-            <button 
-              class="ui-btn {vistaDocumentoActual === 'consentimiento' ? 'ui-btn-primario' : 'ui-btn-secundario'}" 
-              style="padding: 0.4rem 0.8rem; font-size: 0.85rem;"
-              onclick={() => vistaDocumentoActual = 'consentimiento'}>
-              Consentimiento (Adultos)
+          <div class="preview-tabs-container">
+            <button class="ui-btn ui-btn-sm {vistaDocumentoActual === 'consentimiento' ? 'ui-btn-primario' : 'ui-btn-secundario'}" onclick={() => vistaDocumentoActual = 'consentimiento'}>
+              (Consentimiento) Adultos
             </button>
-            <button 
-              class="ui-btn {vistaDocumentoActual === 'asentimiento' ? 'ui-btn-primario' : 'ui-btn-secundario'}" 
-              style="padding: 0.4rem 0.8rem; font-size: 0.85rem;"
-              onclick={() => vistaDocumentoActual = 'asentimiento'}>
-              Asentimiento (Menores)
+            <button class="ui-btn ui-btn-sm {vistaDocumentoActual === 'asentimiento' ? 'ui-btn-primario' : 'ui-btn-secundario'}" onclick={() => vistaDocumentoActual = 'asentimiento'}>
+              (Asentimiento) Menores
             </button>
           </div>
         {:else if herramientaActiva === 'platypus'}
@@ -223,16 +241,14 @@
           <strong>Vista Previa del Documento</strong>
         {/if}
 
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <div class="ui-grupo-acciones">
           {#if formData.iaActivada && aiState.isReady}
-            <button class="ui-btn" style="background-color: #2c3e50; color: white; border: none; font-size: 0.85rem; padding: 0.4rem 0.8rem;" onclick={abrirConsejeria}>
-              Consejero IA
-            </button>
-            <div style="width: 1px; height: 24px; background-color: var(--color-borde); margin: 0 0.5rem;"></div>
+            <button class="ui-btn ui-btn-consejero ui-btn-sm" onclick={abrirConsejeria}>Consejero IA</button>
+            <div class="ui-separador-vertical"></div>
           {/if}
-          <button class="ui-btn ui-btn-primario" onclick={copiarTexto}>Copiar</button>
-          <button class="ui-btn ui-btn-primario" onclick={exportarWord}>Word</button>
-          <button class="ui-btn ui-btn-primario" onclick={imprimirPDF}>PDF</button>
+          <button class="ui-btn ui-btn-primario ui-btn-sm" onclick={copiarTexto}>Copiar</button>
+          <button class="ui-btn ui-btn-primario ui-btn-sm" onclick={exportarWord}>Word</button>
+          <button class="ui-btn ui-btn-primario ui-btn-sm" onclick={imprimirPDF}>PDF</button>
         </div>
       </div>
       
@@ -256,13 +272,13 @@
     <div class="ui-modal-overlay">
       <div class="ui-modal-content">
         <h3 class="ui-modal-titulo">Asistencia de Redacción Inteligente</h3>
-        <p style="font-size: 0.95rem; line-height: 1.5; color: var(--color-texto-secundario); margin-bottom: 1rem;">
+        <p class="ui-modal-texto">
           Esta herramienta utiliza Inteligencia Artificial local para ayudarle a redactar los textos con el tono formal adecuado para el comité de ética.
         </p>
-        <p style="font-size: 0.9rem; line-height: 1.5; color: var(--color-alerta); background-color: var(--color-alerta-fondo); padding: 0.8rem; border-radius: 4px; margin-bottom: 1rem; border: 1px solid #ebccd1;">
+        <p class="ui-modal-alerta">
           <strong>Importante:</strong> Como cualquier modelo de lenguaje, la IA puede omitir información, alterar el sentido original o cometer errores de redacción. Por favor, <strong>revise y valide siempre</strong> el texto generado antes de exportar el documento definitivo.
         </p>
-        <p style="font-size: 0.95rem; line-height: 1.5; color: var(--color-texto-secundario); margin-bottom: 1rem;">
+        <p class="ui-modal-texto">
           <strong>Privacidad total:</strong> Los datos nunca salen de su computador. Para lograr esto, su navegador descargará un motor de IA por única vez (aprox. 800 MB).
         </p>
         <div class="ui-modal-acciones">

@@ -17,6 +17,7 @@
   /* Tipografía y Espaciado */
   --fuente-ui: system-ui, -apple-system, sans-serif;
   --fuente-documento: "Times New Roman", Times, serif;
+  --espaciado-xs: 0.25rem;
   --espaciado-sm: 0.5rem;
   --espaciado-md: 1rem;
   --espaciado-lg: 2rem;
@@ -46,7 +47,18 @@ h1, h2, h3, p {
 .layout-encabezado {
   background-color: var(--color-blanco);
   padding: var(--espaciado-md) var(--espaciado-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.layout-nav {
+  background-color: var(--color-blanco);
   border-bottom: 1px solid var(--color-borde);
+  border-top: 1px solid var(--color-borde);
+  padding: 0 var(--espaciado-lg);
+  display: flex;
+  gap: var(--espaciado-md);
 }
 
 .layout-pantalla-dividida {
@@ -62,6 +74,19 @@ h1, h2, h3, p {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+}
+
+.panel-contenido {
+  padding: var(--espaciado-lg);
+  flex: 1;
+}
+
+.panel-footer-navegacion {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--espaciado-md) var(--espaciado-lg);
+  border-top: 1px solid var(--color-borde);
+  background: #fafafa;
 }
 
 .panel-fondo-previa {
@@ -123,6 +148,15 @@ h1, h2, h3, p {
   font-weight: bold;
   font-size: 0.9rem;
   transition: background-color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.ui-btn-sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
 }
 
 .ui-btn-primario {
@@ -139,13 +173,35 @@ h1, h2, h3, p {
   color: var(--color-texto);
 }
 
+.ui-btn-dev {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.ui-btn-consejero {
+  background-color: #2c3e50;
+  color: white;
+}
+
 .ui-btn[disabled] {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
+.ui-grupo-acciones {
+  display: flex;
+  gap: var(--espaciado-sm);
+  align-items: center;
+}
+
+.ui-separador-vertical {
+  width: 1px;
+  height: 24px;
+  background-color: var(--color-borde);
+  margin: 0 var(--espaciado-sm);
+}
+
 /* 5. Clases para Documentos Legales Generados */
-/* Ajuste a la hoja de papel simulada */
 .doc-papel {
   background-color: var(--color-blanco);
   width: 100%;
@@ -153,7 +209,6 @@ h1, h2, h3, p {
   min-height: 1056px;
   height: auto; 
   flex-shrink: 0; 
-  
   padding: 4rem;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   box-sizing: border-box;
@@ -163,7 +218,6 @@ h1, h2, h3, p {
   margin: 0 auto 2rem auto;
 }
 
-/* Evitar que bloques importantes se corten entre páginas */
 .bloque-indivisible {
   page-break-inside: avoid;
   break-inside: avoid;
@@ -181,31 +235,19 @@ h1, h2, h3, p {
 }
 
 @media print {
-  /* Forzar márgenes en el documento PDF (2.5cm es el estándar de Word) */
-  @page {
-    margin: 2.5cm;
-  }
-
-  body * {
-    visibility: hidden;
-  }
-  
-  #documento-exportable, #documento-exportable * {
-    visibility: visible;
-  }
-  
+  @page { margin: 2.5cm; }
+  body * { visibility: hidden; }
+  #documento-exportable, #documento-exportable * { visibility: visible; }
   #documento-exportable {
     position: absolute;
     left: 0;
     top: 0;
-    /* Quitamos el padding aquí porque el @page ya da las márgenes */
     padding: 0; 
     margin: 0;
     box-shadow: none;
     width: 100%;
     height: auto;
   }
-
   p, h1, h2, h3, li {
     page-break-inside: avoid;
     break-inside: avoid;
@@ -240,9 +282,25 @@ h1, h2, h3, p {
   margin-top: 0;
   font-size: 1.2rem;
   color: var(--color-texto);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.ui-modal-texto {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--color-texto-secundario);
+  margin-bottom: 1rem;
+}
+
+.ui-modal-alerta {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-alerta);
+  background-color: var(--color-alerta-fondo);
+  padding: 0.8rem;
+  border-radius: var(--radio-borde);
+  margin-bottom: 1rem;
+  border: 1px solid #ebccd1;
 }
 
 .ui-modal-acciones {
@@ -250,4 +308,101 @@ h1, h2, h3, p {
   justify-content: flex-end;
   gap: 1rem;
   margin-top: 1.5rem;
+}
+
+/* 7. Encabezados y Tipografía Específica */
+.header-titulo {
+  font-size: 1.4rem;
+  margin-bottom: 0.2rem;
+}
+
+.header-subtitulo {
+  color: var(--color-texto-secundario);
+  font-size: 0.9rem;
+  margin-bottom: 0;
+}
+
+.preview-header {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto 1rem auto;
+  align-items: center;
+}
+
+.preview-tabs-container {
+  display: flex;
+  gap: var(--espaciado-sm);
+  background: var(--color-borde);
+  padding: var(--espaciado-xs);
+  border-radius: var(--radio-borde);
+}
+
+/* 8. Componentes del Asistente IA */
+.ai-progreso-contenedor {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 200px;
+  margin-left: var(--espaciado-sm);
+}
+
+.ai-progreso-texto {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-texto-secundario);
+  margin-bottom: 2px;
+}
+
+.ai-progreso-fondo {
+  width: 100%;
+  background-color: var(--color-borde);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ai-progreso-barra {
+  height: 5px;
+  background-color: var(--color-primario);
+  transition: width 0.2s;
+}
+
+.ai-listo-texto {
+  font-size: 0.9rem;
+  color: #4CAF50;
+  font-weight: bold;
+  margin-left: var(--espaciado-sm);
+}
+
+/* 9. Banners de Sincronización */
+.ui-banner {
+  background-color: #e8f4fd;
+  border: 1px solid #b6d4fe;
+  border-radius: var(--radio-borde);
+  padding: 0.8rem 1.2rem;
+  margin: 1rem 2rem 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ui-banner-contenido {
+  flex: 1;
+}
+
+.ui-banner-titulo {
+  color: #084298;
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.95rem;
+  font-weight: bold;
+}
+
+.ui-banner-texto {
+  color: #052c65;
+  font-size: 0.85rem;
+  margin: 0;
+  line-height: 1.4;
 }

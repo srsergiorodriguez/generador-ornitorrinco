@@ -49,6 +49,9 @@ export const formData = $state({
 
   isValidating: false,
   validationResult: "",
+
+  // Feature flagging
+  habilitarSincronizacion: true,
 });
 
 export const aiState = $state({
@@ -301,4 +304,126 @@ export function importarProyectoJSON(evento) {
     }
   };
   lector.readAsText(archivo);
+}
+
+// --- FUNCIONES DE SINCRONIZACIÓN Y AUTOCOMPLETADO ---
+
+export async function autocompletarDesdePlatypus(herramientaDestino) {
+  if (!aiState.isReady || !aiState.engine) {
+    alert("Por favor, active el Asistente IA primero.");
+    return;
+  }
+
+  aiState.isGenerating = true;
+
+  // 1. Recopilar el contexto base de Platypus
+  const contextoPlatypus = `
+    ENFOQUE Y MÉTODOS: ${formData.platypusDescEnfoque} ${formData.platypusDescMetodos}
+    OBJETIVO: ${formData.platypusObjQue} ${formData.platypusObjComo} ${formData.platypusObjParaQue}
+    DATOS (ALMACENAMIENTO Y RETENCIÓN): ${formData.platypusDatosAlmacenamiento} ${formData.platypusDatosRetencion}
+    PRIVACIDAD Y ANONIMIZACIÓN: ${formData.platypusDatosAcceso}
+    CONTENCIÓN EMOCIONAL: ${formData.platypusContencion}
+  `;
+
+  let promptSincronizacion = "";
+
+  // 2. Definir las instrucciones y el formato JSON esperado según el destino
+  if (herramientaDestino === 'consentimiento') {
+    promptSincronizacion = `Eres un asistente experto en ética de investigación. Extrae la información del proyecto y reescríbela para un Consentimiento Informado dirigido a participantes (lenguaje sencillo, sin jerga).
+    
+    INFORMACIÓN DEL PROYECTO:
+    ${contextoPlatypus}
+    
+    REGLA VITAL: Los textos se insertarán en medio de oraciones preexistentes. NO uses mayúsculas iniciales, NO uses frases introductorias, y NO pongas punto final.
+    
+    Devuelve ÚNICAMENTE un objeto JSON válido con estas 4 claves:
+    {
+      "justificacionObjetivos": "Completa la frase 'Este estudio se realiza con el propósito de...'. Inicia directamente con un verbo en infinitivo.",
+      "metodologiasLibres": "Completa la frase 'Su participación consistirá en...'. Inicia directamente con verbos en infinitivo (ej. participar en entrevistas, permitir la observación).",
+      "descripcionRiesgos": "Describe brevemente los riesgos (fatiga, impacto emocional) sin frases introductorias.",
+      "medidasContencion": "Describe las medidas de protección y rutas de apoyo directo, empezando por la acción."
+    }`;
+  } else if (herramientaDestino === 'politica') {
+    promptSincronizacion = `Eres un oficial de protección de datos (Habeas Data). Extrae la información y redacta fragmentos para una Política de Tratamiento de Datos.
+    
+    INFORMACIÓN DEL PROYECTO:
+    ${contextoPlatypus}
+    
+    REGLA VITAL: Los textos se insertarán como continuaciones de oraciones preexistentes. NO uses frases introductorias. NO uses punto final.
+    
+    Devuelve ÚNICAMENTE un objeto JSON válido con estas 4 claves:
+    {
+      "finalidadEspecifica": "Inicia con verbos en infinitivo. Describe el uso que se le dará a los datos.",
+      "datosCapturados": "Lista directamente los tipos de datos (ej. grabaciones de audio, notas de campo, nombres).",
+      "manejoDatos": "Describe directamente los protocolos de seguridad, cifrado y anonimización aplicados.",
+      "tiempoConservacion": "Especifica directamente los tiempos exactos de retención y el destino final (ej. destrucción o archivo)."
+    }`;
+  }
+
+  try {
+    const messages = [
+      { role: "system", content: "Eres un sistema de procesamiento de datos. Responde estrictamente con JSON válido sin bloques de código ni texto adicional." },
+      { role: "user", content: promptSincronizacion }
+    ];
+
+    const response = await aiState.engine.chat.completions.create({
+      messages,
+      temperature: 0.2, // Baja temperatura para garantizar consistencia estructural
+    });
+
+    const respuestaTexto = response.choices[0]?.message?.content || "";
+    
+    // Limpiar la respuesta en caso de que la IA devuelva bloques markdown ```json ... ```
+    const jsonLimpio = respuestaTexto.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    
+    const datosParseados = JSON.parse(jsonLimpio);
+
+    // 3. Inyectar los datos en el estado global
+    if (herramientaDestino === 'consentimiento') {
+      if (datosParseados.justificacionObjetivos) formData.justificacionObjetivos = datosParseados.justificacionObjetivos;
+      if (datosParseados.metodologiasLibres) formData.metodologiasLibres = datosParseados.metodologiasLibres;
+      if (datosParseados.descripcionRiesgos) formData.descripcionRiesgos = datosParseados.descripcionRiesgos;
+      if (datosParseados.medidasContencion) formData.medidasContencion = datosParseados.medidasContencion;
+    } else if (herramientaDestino === 'politica') {
+      if (datosParseados.finalidadEspecifica) formData.finalidadEspecifica = datosParseados.finalidadEspecifica;
+      if (datosParseados.datosCapturados) formData.datosCapturados = datosParseados.datosCapturados;
+      if (datosParseados.manejoDatos) formData.manejoDatos = datosParseados.manejoDatos;
+      if (datosParseados.tiempoConservacion) formData.tiempoConservacion = datosParseados.tiempoConservacion;
+    }
+
+    alert("Campos autocompletados con éxito. Por favor, revise y ajuste los textos generados.");
+
+  } catch (error) {
+    console.error("Error en sincronización:", error);
+    alert("Hubo un error al procesar el texto o la IA no devolvió el formato esperado. Revise que haya ingresado suficiente información en Platypus.");
+  } finally {
+    aiState.isGenerating = false;
+  }
+}
+
+// --- FUNCIÓN DE DESARROLLO / PRUEBAS ---
+
+export function llenarDatosPruebaPlatypus() {
+  const confirmar = confirm("Esto sobrescribirá los datos actuales en el formulario Platypus. ¿Desea continuar?");
+  if (!confirmar) return;
+
+  formData.platypusDescEnfoque = "La investigación se enmarca en un paradigma cualitativo e interpretativo de corte etnográfico, orientado a comprender las dinámicas de conceptualización estética. Se evitará la recolección de variables clínicas, financieras o biométricas, centrándose exclusivamente en narrativas y opiniones sobre la práctica artística.";
+  
+  formData.platypusDescMetodos = "La recolección primaria se realizará mediante entrevistas semiestructuradas (grabadas en audio) y diarios de campo de observación participante. Los guiones temáticos están diseñados para no indagar en aspectos de la vida privada. Las conversaciones informales solo serán registradas previo asentimiento verbal continuo del interlocutor.";
+  
+  formData.platypusDescFases = "Fase 1: Preproducción, obtención de avales y diseño de guiones. Fase 2: Trabajo de campo (entrevistas) durante 4 meses. Fase 3: Transcripción, codificación axial mediante software cualitativo, y destrucción de audios originales.";
+  
+  formData.platypusObjQue = "delimitar los procesos de conceptualización estética contemporánea";
+  formData.platypusObjComo = "mediante la aplicación del método etnográfico y la teoría fundamentada";
+  formData.platypusObjParaQue = "para construir un marco comprensivo sobre la validación del arte en contextos universitarios emergentes";
+  
+  formData.platypusDatosAlmacenamiento = "Los audios crudos y el libro de transcripciones se almacenarán en una carpeta institucional de Microsoft SharePoint asignada por la universidad, protegida con cifrado en reposo y autenticación de doble factor (2FA). Queda estrictamente prohibido el uso de discos duros portátiles no cifrados o nubes comerciales personales.";
+  
+  formData.platypusDatosRetencion = "Los audios crudos con voces identificables serán destruidos de forma segura 6 meses después de su transcripción y validación. Las transcripciones anonimizadas y la matriz de códigos se conservarán por 5 años para auditorías académicas, tras lo cual serán eliminadas de los servidores institucionales.";
+  
+  formData.platypusDatosAcceso = "Solo el investigador principal accederá a los audios. La transcripción se hará in-house sin intermediarios. Se aplicará un protocolo de disociación: los nombres reales se reemplazarán por identificadores alfanuméricos (ej. P-01). El documento llave que vincula nombres e IDs se guardará en un servidor local sin conexión a red, separado de las transcripciones.";
+  
+  formData.platypusContencion = "Dado que los informantes pertenecen a la misma facultad del investigador, existe riesgo de represalias sociales o presión de pares. Para mitigarlo, se garantizará anonimato absoluto en cualquier publicación (no se usarán detalles descriptivos que permitan triangulación). Si el participante manifiesta fatiga, se pausará la sesión. Se habilitará un correo institucional exclusivo para gestionar solicitudes de retiro de datos (opt-out) válidas hasta la fase de codificación.";
+  
+  alert("Datos de prueba de alta rigurosidad cargados en el Asistente Platypus.");
 }
